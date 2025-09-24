@@ -1,4 +1,6 @@
 <?php
+namespace Licenzo;
+
 use Licenzo\License;
 use Licenzo\Client;
 
