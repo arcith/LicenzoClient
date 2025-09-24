@@ -6,7 +6,7 @@ use Licenzo\License;
 use Licenzo\Client;
 
 // Create a license instance (hash is null initially)
-$license = new License('LICENSE_KEY', 'PRODUCT_NAME', 'VARIATION_ID');
+$license = new License('LICENSE_KEY', 'PRODUCT_UUID', 'VARIATION_UUID');
 
 // Create client
 $client = new Client('http://localhost/licenzo/wp-json/licenzo/v1');
