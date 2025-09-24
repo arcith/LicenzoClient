@@ -1,0 +1,18 @@
+{
+    "name": "licenzo/client",
+    "description": "Licenzo Client",
+    "type": "library",
+    "license": "GPL-3.0",
+    "autoload": {
+        "psr-4": {
+            "Licenzo\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Milton Dey Mishu",
+            "email": "114005218+softengmilton@users.noreply.github.com"
+        }
+    ],
+    "require": {}
+}
