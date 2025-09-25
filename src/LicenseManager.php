@@ -11,6 +11,7 @@ class LicenseManager
     private $client;
     private $option;
     private $response = [];
+    private array $meta = [];
 
     public function __construct($key, $product, $variation, $api, $option = 'license_hash')
     {
@@ -19,9 +20,18 @@ class LicenseManager
         $this->option = $option;
     }
 
+    /**
+     * Set custom activation meta
+     */
+    public function setMeta(array $meta): self
+    {
+        $this->meta = $meta;
+        return $this;
+    }
+
     public function activate()
     {
-        $this->response = $this->client->activate($this->license,  $this->defaultMeta());
+        $this->response = $this->client->activate($this->license,  $this->getMeta());
         update_option($this->option, $this->response['hash']);
         return $this->response;
     }
@@ -31,10 +41,7 @@ class LicenseManager
         $hash = get_option($this->option);
         if (!$hash) return false;
         $this->license->setHash($hash);
-        $this->response = $this->client->check($this->license, [
-            'site'   => get_site_url(),
-            'device' => php_uname('n')
-        ]);
+        $this->response = $this->client->check($this->license, $this->getMeta());
         update_option($this->option, $this->response['hash']);
         return $this->response['hash'];
     }
@@ -82,9 +89,16 @@ class LicenseManager
     {
         return !empty($this->response['active']);
     }
+    /**
+     * Get meta to use: custom if set, otherwise default
+     */
+    private function getMeta(): array
+    {
+        return !empty($this->meta) ? $this->meta : $this->defaultMeta();
+    }
 
     /**
-     * Always include the current domain for uniqueness.
+     * Default meta values
      */
     private function defaultMeta(): array
     {

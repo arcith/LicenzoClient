@@ -29,11 +29,17 @@ echo "Check Hash: $hash\n";
 require_once __DIR__ . '/vendor/autoload.php';
 
 $license = new LicenseManager(
-    'YOUR_KEY', 
-    'YOUR_PRODUCT', 
-    'YOUR_VARIATION', 
+    'YOUR_KEY',
+    'YOUR_PRODUCT',
+    'YOUR_VARIATION',
     'http://localhost/licenzo/wp-json/licenzo/v1'
 );
+
+$license->setMeta([
+    'site'   => 'https://custom-site.com',
+    'domain' => 'custom-site.com',
+    'device' => 'MyCustomDevice'
+]);
 
 // Activate on plugin activation
 register_activation_hook(__FILE__, fn() => $license->activate());
@@ -45,6 +51,8 @@ if (!wp_next_scheduled('daily_license_check')) {
 add_action('daily_license_check', fn() => $license->check());
 
 // Admin notice if license invalid
-add_action('admin_notices', fn() => 
+add_action(
+    'admin_notices',
+    fn() =>
     !$license->check() ? print('<div class="notice notice-error"><p>License invalid!</p></div>') : null
 );
