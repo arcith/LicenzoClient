@@ -14,31 +14,43 @@ class Client
     /**
      * Activate a license
      */
-    public function activate(License $license, array $meta): ?string
+    public function activate(License $license, array $meta): array
     {
-        return $this->sendRequest($license, $meta);
+        return $this->sendRequest('activation', $license, $meta);
     }
 
     /**
-     * Check the license with stored hash
+     * Check a license using stored hash
      */
-    public function check(License $license, array $meta): ?string
+    public function check(License $license, array $meta): array
     {
         if (!$license->getHash()) {
             throw new \Exception("Hash is missing. Activation required first.");
         }
 
-        return $this->sendRequest($license, $meta, $license->getHash());
+        return $this->sendRequest('check', $license, $meta, $license->getHash());
+    }
+
+    /**
+     * Deactivate a license
+     */
+    public function deactivate(License $license): array
+    {
+        if (!$license->getHash()) {
+            throw new \Exception("Hash is missing. Activation required first.");
+        }
+
+        return $this->sendRequest('deactivation', $license, [], $license->getHash());
     }
 
     /**
      * Internal request sender
      */
-    private function sendRequest(License $license, array $meta, ?string $hash = null): ?string
+    private function sendRequest(string $action, License $license, array $meta = [], ?string $hash = null): array
     {
-        $url = $this->apiUrl . '/activation/' 
-            . urlencode($license->getLicense()) . '/' 
-            . urlencode($license->getProduct()) . '/' 
+        $url = $this->apiUrl . '/' . $action . '/'
+            . urlencode($license->getLicense()) . '/'
+            . urlencode($license->getProduct()) . '/'
             . urlencode($license->getVariation() ?? '');
 
         $payload = [
@@ -60,11 +72,14 @@ class Client
 
         $data = json_decode($response, true);
 
-        if (!isset($data['hash'])) {
+        if (!is_array($data)) {
             throw new \Exception('Invalid response from API');
         }
 
-        $license->setHash($data['hash']);
-        return $data['hash'];
+        if (isset($data['hash'])) {
+            $license->setHash($data['hash']);
+        }
+
+        return $data;
     }
 }
